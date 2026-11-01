@@ -40,6 +40,13 @@ All optics come from a live numerical integration of a Schwarzschild black hole:
 ./install.sh
 ```
 
+**Debian / Ubuntu / Mint (recommended)** — grab the `.deb` from [Releases](https://github.com/Wian1977/blackhole-screensaver/releases/tag/v1.0) and install:
+```bash
+sudo dpkg -i blackhole-screensaver_1.0.0_all.deb
+```
+This installs system-wide to `/usr/share/blackhole-screensaver`, adds desktop entries, and auto-starts the daemon on login.  
+**其他发行版 / 源码安装**: 用下面的 `./install.sh` 装到用户目录。
+
 This copies the app to `~/.local/share/blackhole-screensaver/`, registers a session **autostart**, and (on Xfce/MATE) a native screensaver entry. A menu item (Graphics) and a Desktop shortcut are also created.
 
 装到 `~/.local/share/blackhole-screensaver/`，注册登录自启，并在 Xfce/MATE 注册原生屏保项，同时生成菜单项与桌面快捷方式。
