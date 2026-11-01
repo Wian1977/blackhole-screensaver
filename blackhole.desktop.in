@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Black Hole
+Comment=Native GL black-hole gravitational-lensing screensaver
+Exec=python3 @BH_GL@
+TryExec=python3
+Terminal=false
+Type=Application
+Categories=Screensaver;
+OnlyShowIn=XFCE;MATE;KDE;
+Hidden=true

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Black Hole Screensaver
+Comment=Launch black hole fullscreen visualization
+Exec=python3 @BH_GL@
+TryExec=python3
+Terminal=false
+Categories=Graphics;Utility;
+Keywords=blackhole;screensaver;
+Icon=@ICON@
