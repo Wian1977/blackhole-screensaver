@@ -1,49 +1,89 @@
-# Black Hole Screensaver — KDE Store 上架物料
+# Black Hole Screensaver — 上架物料 / Store Listing Material
 
-本目录为 #1（KDE Store 上架现有 GTK/Python 包）的准备物料。
+本目录为商店上架（KDE Store / Pling / 其他）准备的文案与打包脚本。
+主分发渠道目前是 **GitHub Releases**（见下），KDE Store 作为可选项。
 
-## 1) 上架文案（直接复制到商店对应输入框）
+Primary distribution channel is **GitHub Releases**; KDE Store / Pling are optional.
 
-标题 (Title):
-  Black Hole Screensaver
+- 仓库 Repo: https://github.com/Wian1977/blackhole-screensaver
+- 发布 Release: https://github.com/Wian1977/blackhole-screensaver/releases/tag/v1.0
+- 截图 Screenshot: 仓库根目录 `screenshot.png`（上架时直接用它，无需另截）
 
-一句话摘要 (Summary):
-  Native OpenGL black-hole gravitational-lensing screensaver for Linux desktops.
+---
 
-描述 (Description) — 整段复制:
-  Black Hole Screensaver is a native OpenGL visualization of a Schwarzschild
-  black hole with real-time gravitational lensing, an accretion disk, relativistic
-  beaming, and chromatic Doppler/gravitational redshift. A small DE-independent
-  daemon auto-launches it full-screen on idle/lock; it stays under the lock screen
-  and exits on any input. Works on any X11 Linux desktop (Cinnamon, Xfce, MATE,
-  GNOME, KDE). Near-zero GPU load when idle.
+## 1) 上架文案（复制到商店输入框）
 
-  Features:
-  - Real geodesic light-bending (Schwarzschild lensing) of disk + background stars
-  - Accretion disk with relativistic beaming and chromatic redshift (blue approach / red recede)
-  - Lensed Einstein-ring star field (toggleable); quality tiers for star density
-  - Idle auto-launch, persists under lock screen, exits on input
-  - Adjustable distance, brightness, redshift, drift; 3 quality tiers
+**标题 Title:** Black Hole Screensaver (黑洞屏保)
 
-  Install: extract, run ./install.sh (installs to ~/.local/share/blackhole-screensaver,
-  registers autostart + desktop entries).
-  Requires: python3, PyGObject (GTK3), python3-xlib, Mesa/OpenGL.
-  License: MIT.
+**一句话摘要 Summary:**
+- EN: Native OpenGL Schwarzschild black-hole screensaver with real gravitational lensing.
+- ZH: 基于真实物理参数的施瓦西黑洞原生 OpenGL 屏保。
 
-许可证 (License): MIT
+**描述 Description（整段复制 EN）:**
+Black Hole Screensaver is a native OpenGL visualization of a Schwarzschild black
+hole simulated with **real physical parameters**. Light rays are bent by real-time
+geodesic integration in the Schwarzschild metric (u'' = -u + 1.5·rs·u²); the
+accretion disk shows relativistic beaming (I ∝ g³) and chromatic Doppler +
+gravitational redshift (blue approach / red recede). Background stars are lensed
+onto the Einstein ring via a baked lookup table. A tiny DE-independent daemon
+auto-launches it full-screen on idle/lock, keeps it under the lock screen, and
+exits on any input. Works on any X11 Linux desktop (Cinnamon, Xfce, MATE, GNOME,
+KDE). Near-zero GPU load when idle.
 
-## 2) 依赖（填到 Dependencies / Comments）
-  python3, python3-gi (GTK3), python3-xlib, gir1.2-gtk-3.0, Mesa/OpenGL
+Features:
+- Real geodesic light-bending (Schwarzschild lensing) of disk + background stars
+- Accretion disk with relativistic beaming and chromatic redshift
+- Lensed Einstein-ring star field (toggleable) + 3 quality tiers for star density
+- Idle auto-launch, persists under lock screen, exits on input
+- Live controls: distance, disk brightness, star lensing, drift, pause, quality
 
-## 3) 给最终用户的安装说明（放 Install / Comments）
-  tar xzf blackhole-screensaver-*.tar.gz
-  cd blackhole-screensaver
-  ./install.sh
-  锁屏或空闲即出现黑洞；Esc 或任意输入退出。卸载：./install.sh --uninstall
+Install: extract, run `./install.sh` (installs to ~/.local/share/blackhole-screensaver,
+registers autostart + desktop entries). Requires python3, PyGObject (GTK3),
+python3-xlib, Mesa/OpenGL. License: MIT.
 
-## 4) 截图（必须，自己截一张）
-  在桌面机锁屏前截一张运行图，上架时上传（商店要求至少 1 张）。
+**许可证 License:** MIT
 
-## 5) 已知限制（建议也写进描述或评论）
-  - 当前 X11 守护路径为 DE 无关；Wayland 原生集成（Plasma 插件）在计划中。
-  - 非 KDE 的 X11 桌面同样可用（走通用 freedesktop 锁屏信号）。
+---
+
+## 2) 依赖（Dependencies）
+python3, python3-gi (GTK3), python3-xlib, gir1.2-gtk-3.0, Mesa/OpenGL
+
+## 3) 终端用户安装说明（Install / Comments）
+```
+tar xzf blackhole-screensaver-*.tar.gz
+cd blackhole-screensaver
+./install.sh
+# 锁屏或空闲即出现黑洞；Esc 或任意输入退出
+# 卸载: ./install.sh --uninstall
+```
+
+## 4) 快捷键（运行时，可放描述/评论）
+| Key | Action |
+|-----|--------|
+| H | 帮助开关 Help |
+| M | 自动运镜 Auto camera |
+| L | 星空引力透镜 Star lensing |
+| Space | 暂停/继续 Pause |
+| S | 声音静音 Mute |
+| 1/2/3 | 画质 高/中/低 Quality |
+| [ / ] | 距离 远/近 Distance |
+| B | 盘面亮度 Disk brightness |
+| Esc | 退出 Quit (manual) |
+
+## 5) 画质等级（Quality tiers）
+| Level | Stars | Disk res | Ray steps |
+|-------|-------|----------|-----------|
+| High | ~32,000 | 1.0× | 512 |
+| Medium | ~12,000 | 0.5× | 256 |
+| Low | ~4,000 | 0.5× | 256 |
+
+## 6) 截图（Screenshot）
+用仓库根目录的 `screenshot.png`（已含真实运行画面）。商店通常要求 ≥1 张，直接上传它即可。
+
+## 7) 已知限制（建议也写进描述/评论）
+- 当前仅支持 **X11** 会话；Wayland（现代 GNOME/KDE 默认）暂不支持，原生 Wayland 锁屏集成在路线图中。
+- 非 KDE 的 X11 桌面同样可用（走通用 freedesktop 锁屏信号）。
+- Windows / macOS 无屏保整合（渲染核心可手动跑，但不建议作为屏保）。
+
+## 8) 打包（本目录脚本）
+`make_bundle.sh` 生成 `blackhole-screensaver-YYYYMMDD.tar.gz`，即上架/Release 用的安装包。
