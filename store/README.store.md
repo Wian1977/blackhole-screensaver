@@ -6,8 +6,8 @@
 Primary distribution channel is **GitHub Releases**; KDE Store / Pling are optional.
 
 - 仓库 Repo: https://github.com/Wian1977/blackhole-screensaver
-- 发布 Release: https://github.com/Wian1977/blackhole-screensaver/releases/tag/v1.0
-- 截图 Screenshot: 仓库根目录 `screenshot.png`（上架时直接用它，无需另截）
+- 发布 Release: https://github.com/Wian1977/blackhole-screensaver/releases/tag/v1.1.0
+- 截图 Screenshot: 用 `python3 bh_gl.py --screenshot out.png` 生成或截运行画面；仓库不再内置固定截图，商店要求 ≥1 张时上传即可。
 
 ---
 
@@ -27,8 +27,10 @@ accretion disk shows relativistic beaming (I ∝ g³) and chromatic Doppler +
 gravitational redshift (blue approach / red recede). Background stars are lensed
 onto the Einstein ring via a baked lookup table. A tiny DE-independent daemon
 auto-launches it full-screen on idle/lock, keeps it under the lock screen, and
-exits on any input. Works on any X11 Linux desktop (Cinnamon, Xfce, MATE, GNOME,
-KDE). Near-zero GPU load when idle.
+exits on any input. Works on any Linux desktop (X11 or Wayland) across Cinnamon,
+Xfce, MATE, GNOME, and KDE via a DE-independent daemon; on Wayland the window
+appears beneath/before the lock screen (graceful degradation, never crashes).
+Near-zero GPU load when idle.
 
 Features:
 - Real geodesic light-bending (Schwarzschild lensing) of disk + background stars
@@ -78,11 +80,12 @@ cd blackhole-screensaver
 | Low | ~4,000 | 0.5× | 256 |
 
 ## 6) 截图（Screenshot）
-用仓库根目录的 `screenshot.png`（已含真实运行画面）。商店通常要求 ≥1 张，直接上传它即可。
+用 `python3 bh_gl.py --screenshot out.png` 生成运行画面（或锁屏时截屏）。商店通常要求 ≥1 张，上传任一即可；仓库不再内置固定截图，建议用你自己机器上的实拍。
 
 ## 7) 已知限制（建议也写进描述/评论）
-- 当前仅支持 **X11** 会话；Wayland（现代 GNOME/KDE 默认）暂不支持，原生 Wayland 锁屏集成在路线图中。
-- 非 KDE 的 X11 桌面同样可用（走通用 freedesktop 锁屏信号）。
+- **通用**：基于 XDG / 各桌面锁屏 DBus 信号（org.freedesktop.ScreenSaver、org.kde/cinnamon/gnome/mate ScreenSaver），X11 与 Wayland 都能启动守护进程，不会一上来就崩。
+- **Wayland 优雅降级**：X11 下窗口完美覆盖锁屏；Wayland 下合成器锁屏会盖住普通全屏窗口，黑洞出现在锁屏之下或之前、且不崩溃。若要 Wayland 强制覆盖锁屏需 ext-session-lock-v1 / layer-shell / KDE 锁屏插件（待做）。
+- KDE 屏保选择器：KDE 不读 XDG screensavers 目录，无法在设置里手动选；KDE 下靠守护进程自动触发即可。
 - Windows / macOS 无屏保整合（渲染核心可手动跑，但不建议作为屏保）。
 
 ## 8) 打包（本目录脚本）

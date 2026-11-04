@@ -6,5 +6,5 @@ TryExec=python3
 Terminal=false
 Type=Application
 Categories=Screensaver;
-OnlyShowIn=XFCE;MATE;KDE;
+OnlyShowIn=XFCE;MATE;CINNAMON;
 Hidden=true

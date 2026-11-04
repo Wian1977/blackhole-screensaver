@@ -19,6 +19,8 @@ import sys
 import os
 import argparse
 import ctypes
+import struct
+import zlib
 import traceback
 import random
 
@@ -46,11 +48,28 @@ AUTO_ROLL_RATE = 0.022
 AUTO_BREATH_AMP = 0.35
 AUTO_BREATH_RATE = 0.05
 
-# 大漂移（对齐 web 版 v2.71）：每 DRIFT_INTERVAL 秒 yaw 强制参与的大转向，smoothstep 缓动
-DRIFT_INTERVAL = 150.0   # 秒
-DRIFT_DUR = 25.0         # 秒，缓动过渡时长
-DRIFT_AMP_FRAC = 0.14    # 变化幅度 ≤ 全量程 14%（与 web 一致）
-PARAM_RANGES = {"yaw": (-180.0, 180.0), "roll": (-180.0, 180.0), "tiltDeg": (78.0, 98.0)}
+# 大漂移（对齐 web 版 v2.155）：每 DRIFT_INTERVAL 秒 yaw 强制参与的大转向，smoothstep 缓动
+DRIFT_INTERVAL = 300.0   # 秒
+DRIFT_DUR = 28.0         # 秒，缓动过渡时长
+DRIFT_AMP_FRAC = 0.10    # 变化幅度 ≤ 全量程 10%（roll/yaw）；tilt 用绝对 ±10°
+PARAM_RANGES = {"yaw": (-180.0, 180.0), "roll": (-180.0, 180.0), "tiltDeg": (73.0, 93.0)}
+
+
+def write_png(path, w, h, rgb):
+    """rgb: bytes of length w*h*3, row-major, top-left origin (caller already flipped)."""
+    def chunk(typ, data):
+        return (struct.pack(">I", len(data)) + typ + data
+                + struct.pack(">I", zlib.crc32(typ + data) & 0xFFFFFFFF))
+    raw = bytearray()
+    for y in range(h - 1, -1, -1):
+        raw.append(0)
+        raw.extend(rgb[y * w * 3:(y + 1) * w * 3])
+    comp = zlib.compress(bytes(raw), 9)
+    with open(path, "wb") as f:
+        f.write(b"\x89PNG\r\n\x1a\n")
+        f.write(chunk(b"IHDR", struct.pack(">IIBBBBB", w, h, 8, 2, 0, 0, 0)))
+        f.write(chunk(b"IDAT", comp))
+        f.write(chunk(b"IEND", b""))
 
 
 def gl_check(label):
@@ -220,7 +239,7 @@ _PLUG_MODE = any(a == "--plug-id" for a in _sys.argv)
 
 
 class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
-    def __init__(self, quality="mid", renderscale=1.0, hint="", daemon=False, plug_id=None):
+    def __init__(self, quality="mid", renderscale=1.0, hint="", daemon=False, plug_id=None, windowed=False):
         super(BlackHoleWindow, self).__init__()
         self.daemon = daemon
         self.quality = quality
@@ -264,8 +283,11 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
         if plug_id is None:
             self.set_title("Black Hole Screensaver")
             self.set_app_paintable(True)
-            self.fullscreen()
-            self.set_keep_above(True)
+            if windowed:
+                self.set_default_size(1280, 720)
+            else:
+                self.fullscreen()
+                self.set_keep_above(True)
 
         self.glarea = Gtk.GLArea()
         self.glarea.set_use_es(False)
@@ -325,7 +347,8 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
         gl.glUniform1f(self.loc["uOuter"], PARAMS["outer"])
         gl.glUniform1f(self.loc["uBrightness"], PARAMS["brightness"])
         gl.glUniform1f(self.loc["uRotSpeed"], PARAMS["rotSpeed"])
-        gl.glUniform1f(self.loc["uRs"], 1.0)
+        # v2.155: bCrit = 2.598076 * uRs，且 ringIn 锁定为 bCrit，故 uRs = ringIn/2.598076
+        gl.glUniform1f(self.loc["uRs"], float(PARAMS["ringIn"]) / 2.598076)
         gl.glUniform1f(self.loc["uArc"], PARAMS["ring"])
         gl.glUniform1f(self.loc["uTempK"], PARAMS["tempK"])
         gl.glUniform1f(self.loc["uMaxSteps"], float(q["maxSteps"]))
@@ -345,7 +368,7 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
             gl.glBindFramebuffer(glext.GL_FRAMEBUFFER, fbo)
             gl.glReadBuffer(glext.GL_COLOR_ATTACHMENT0)
             buf = (ctypes.c_ubyte * (w * h * 3))()
-            gl.glReadPixels(0, 0, w, h, gl.GL_RGB, gl.GL_UNSIGNED_BYTE, buf)
+            gl.glReadPixels(0, 0, w, h, glext.GL_RGB, glext.GL_UNSIGNED_BYTE, buf)
             gl.glBindFramebuffer(glext.GL_FRAMEBUFFER, self._win_fbo)
             with open(path, "wb") as f:
                 nl = chr(10)
@@ -361,6 +384,38 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
         self.last_w = w
         self.last_h = h
         self.postfx.resize(w, h, self.disk_scale)
+        self.disk_w = self.postfx.disk_w
+        self.disk_h = self.postfx.disk_h
+
+    def screenshot(self, path):
+        """读取最终帧缓冲（含辉光）保存为 PNG；优先 GL_FRONT，全黑时回退 GL_BACK。"""
+        try:
+            self.glarea.make_current()
+        except Exception:
+            pass
+        w = self.last_w or self.glarea.get_allocated_width()
+        h = self.last_h or self.glarea.get_allocated_height()
+        if w <= 0 or h <= 0:
+            w, h = 1280, 720
+
+        fb = getattr(self, "_win_fbo", 0) or 0
+
+        def readbuf(rb):
+            gl.glBindFramebuffer(glext.GL_FRAMEBUFFER, fb)
+            gl.glReadBuffer(rb)
+            buf = (ctypes.c_ubyte * (w * h * 3))()
+            gl.glReadPixels(0, 0, w, h, glext.GL_RGB, glext.GL_UNSIGNED_BYTE, buf)
+            return bytes(buf)
+
+        try:
+            data = readbuf(glext.GL_COLOR_ATTACHMENT0)
+            if sum(data[0:min(len(data), 4000)]) == 0:
+                data = readbuf(glext.GL_BACK)
+            write_png(path, w, h, data)
+            print("screenshot saved:", path, "%dx%d" % (w, h))
+        except Exception as e:
+            sys.stderr.write("screenshot failed: " + str(e) + chr(10))
+        return True
         self.disk_w = self.postfx.disk_w
         self.disk_h = self.postfx.disk_h
 
@@ -431,7 +486,7 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
             # 3) 合成 + 辉光 -> 屏幕
             self.postfx.render(w, h, float(PARAMS["bloom"]), 0.55, 0.45, self._win_fbo)
             if os.environ.get("BH_GL_DUMP"):
-                self._dump_fbo(self.postfx.comp_fbo, w, h, "/tmp/bh_dump.ppm")
+                self._dump_fbo(self.postfx.disk_fbo, self.disk_w, self.disk_h, "/tmp/bh_dump.ppm")
             gl_check("final")
             gl.glFlush()
         except Exception as e:
@@ -697,13 +752,42 @@ def main():
     ap.add_argument("--renderscale", type=float, default=1.0)
     ap.add_argument("--plug-id", type=int, default=None, help="XEmbed socket id (plugin mode)")
     ap.add_argument("--hint", default="")
+    ap.add_argument("--screenshot", default=None, help="render N frames then save PNG to this path and quit")
+    ap.add_argument("--frames", type=int, default=60, help="frames to render before screenshot")
+    ap.add_argument("--no-disk", action="store_true", help="start with disk brightness off")
+    ap.add_argument("--no-star-lens", action="store_true", help="start with star lensing off")
+    ap.add_argument("--tilt", type=float, default=None, help="override tiltDeg")
     args = ap.parse_args()
+    if args.tilt is not None:
+        PARAMS["tiltDeg"] = args.tilt
 
     win = BlackHoleWindow(quality=args.quality, renderscale=args.renderscale,
-                          hint=args.hint, daemon=args.daemon, plug_id=args.plug_id)
+                          hint=args.hint, daemon=args.daemon, plug_id=args.plug_id,
+                          windowed=(args.screenshot is not None))
+    win.star_lens = not args.no_star_lens
+    win.disk_bright = not args.no_disk
     win.show_all()
     win.present()
     win.set_focus(win.glarea)
+
+    if args.screenshot:
+        win.help_visible = False
+        try:
+            win.help_label.set_visible(False)
+        except Exception:
+            pass
+        path = args.screenshot
+        frames = max(1, args.frames)
+
+        def _shoot():
+            win.screenshot(path)
+            Gtk.main_quit()
+            return False
+
+        # 渲染若干帧让星空/透镜/盘稳定后截图
+        GLib.timeout_add(int(frames * 16.7) + 200, _shoot)
+        Gtk.main()
+        return
 
     if args.daemon:
         try:

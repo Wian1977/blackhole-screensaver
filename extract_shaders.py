@@ -8,14 +8,15 @@
 不依赖任何第三方包，纯标准库。
 """
 import io
+import re
 
 BQ = chr(96)
 TOK = "DISK_" + "COMMON_" + "GLSL"
 DL = chr(36) + "{" + TOK + "}"
 NL = chr(10)
 
-SRC = "/home/u/ops/blackhole/黑洞模拟_湍流增强.html"
-OUT = "/home/u/ops/blackhole/screensaver_native/shaders.py"
+SRC = "/home/u/blackhole/v2155/黑洞模拟_v2155.html"
+OUT = "/home/u/blackhole/blackhole-screensaver/shaders.py"
 
 
 def extract_common(html):
@@ -37,10 +38,29 @@ COMMON = None
 FRAG_INNER = None
 
 
+def collect_prefix_consts(prefix):
+    """v2155 把部分 const（如 EDGE_GAIN）声明在 varying 之前；抽取时前缀被整体裁掉
+    会导致这些常量在 main 里 undeclared。这里只把前缀里的 `const float X = ...;`
+    抽出来回填到 body 开头，且不与 body 内（DISK_COMMON_GLSL 等）重复声明。"""
+    out = []
+    seen = set()
+    for ln in prefix.split("\n"):
+        s = ln.strip()
+        m = re.match(r"const\s+float\s+(\w+)\s*=", s)
+        if m and m.group(1) not in seen:
+            seen.add(m.group(1))
+            out.append(ln.rstrip())
+    return "\n".join(out)
+
+
 def build_frag():
     global COMMON, FRAG_INNER
     vi = FRAG_INNER.index("varying vec3 vWorldPos;")
+    prefix = FRAG_INNER[:vi]
     body = FRAG_INNER[vi + len("varying vec3 vWorldPos;"):]
+    consts = collect_prefix_consts(prefix)
+    if consts:
+        body = consts + NL + body
 
     body = body.replace(
         "vec3 rd = normalize(vWorldPos - uCamPos);",
@@ -52,14 +72,16 @@ def build_frag():
         "gl_FragColor = vec4(acc, 1.0);",
         "fragColor = vec4(acc, 1.0);",
     )
+    # v2155 的 alpha = max(clamp(1.0 - T, 0.0, 1.0), occ) 即盘面不透明度；
+    # 保留它，让 COMPOSITE_FS 的 s.rgb*(1-d.a) 在盘面透明处透出星空层
+    # （StarLayer：主像背景星 + 镜向爱因斯坦环），与网页版一致。
+    # 不再把程序化 starField 注入盘着色器（星空统一由 StarLayer 负责）。
     body = body.replace(
-        "gl_FragColor = vec4(acc, clamp(1.0 - T, 0.0, 1.0));",
-        "vec3 star = starField(rd);" + NL + "  fragColor = vec4(acc + star * T, 1.0);",
+        "gl_FragColor = vec4(acc + ring, max(clamp(1.0 - T, 0.0, 1.0), occ));",
+        "fragColor = vec4(acc + ring, max(clamp(1.0 - T, 0.0, 1.0), occ));",
     )
 
     si = body.index("void main()")
-    body = body[:si] + STARFIELD + NL + body[si:]
-
     frag = HEADER + body
     return frag
 

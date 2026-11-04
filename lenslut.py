@@ -135,8 +135,9 @@ def build_lens_lut(ratio, r0=12.0):
     return data
 
 
-def default_ratio(ring_in=2.25, distance=12.0):
-    """与网页 updateStars 一致：rs = ringIn/2.598076, r0 = |相机-黑洞| = distance。"""
+def default_ratio(ring_in=3.05, distance=30.0):
+    """与网页 v2.155 一致：rs = ringIn/2.598076, r0 = |相机-黑洞| = distance。
+    ringIn=3.05 -> uRs=1.173946, ratio = rs/r0 = 0.0391315。"""
     return (ring_in / 2.598076) / abs(distance)
 
 
