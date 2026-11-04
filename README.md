@@ -1,5 +1,7 @@
 # Black Hole Screensaver · 黑洞屏保
 
+English version / 英文版：[README.en.md](README.en.md)
+
 把《星际穿越》里的 Gargantua 黑洞变成你的 Linux 屏保 —— 不是循环视频，而是每一帧都由 GPU 实时演算的真实物理黑洞。
 
 This is a native OpenGL Linux screensaver that renders a real Schwarzschild black hole. Every frame is computed live on your GPU via geodesic light-bending — not a pre-rendered clip, not a looping video.
