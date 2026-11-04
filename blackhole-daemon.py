@@ -9,7 +9,7 @@
 #
 # 激活（锁屏 / 空闲到阈值）时拉起 bh_gl.py 全屏窗口；取消激活（解锁 / 有输入）时退出。
 # 顶部不再 import Xlib，因此 Wayland 或无 X 的环境也能正常启动，不会一上来就崩。
-import os, sys, subprocess, argparse
+import os, sys, subprocess, argparse, fcntl
 
 SELF = os.path.abspath(__file__)
 BH_GL = os.environ.get('BH_GL') or os.path.join(os.path.dirname(SELF), 'bh_gl.py')
@@ -192,6 +192,18 @@ def uninstall():
 def detect_de():
     return os.environ.get('XDG_CURRENT_DESKTOP', 'unknown')
 
+_lock_fd = None
+def _lock():
+    global _lock_fd
+    lock_path = os.path.expanduser('~/.local/share/blackhole-screensaver/.daemon.lock')
+    try:
+        _lock_fd = os.open(lock_path, os.O_CREAT | os.O_RDWR, 0o644)
+        fcntl.flock(_lock_fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        sys.stderr.write('blackhole-daemon already running, exit.\n')
+        os._exit(0)
+
+
 def main():
     global IDLE_MIN
     ap = argparse.ArgumentParser(description='Black Hole 通用屏保守护守护进程')
@@ -210,6 +222,7 @@ def main():
         print('DE=%s idle_min=%.1f bh_running=%s lock_active=%s daemon_pid=%d'
               % (detect_de(), IDLE_MIN, bh_running(), lock_active, os.getpid()))
         return
+    _lock()
     print('blackhole-daemon: DE=%s（DBus 通用触发 / X11 回退）' % detect_de(), flush=True)
     setup_dbus()
     if not subscribed:
