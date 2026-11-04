@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Black Hole Screensaver · 黑洞屏保</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #05060a; color: #e8eaf0; font-family: -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; line-height: 1.6; }
+  header { text-align: center; padding: 64px 16px 32px; background: radial-gradient(1200px 500px at 50% -10%, rgba(120,90,255,.25), transparent); }
+  h1 { font-size: clamp(28px, 5vw, 48px); margin: 0 0 8px; letter-spacing: .5px; }
+  .tag { color: #9aa3b2; font-size: 15px; max-width: 720px; margin: 0 auto; }
+  .cta { margin-top: 24px; }
+  .cta a { display: inline-block; margin: 6px; padding: 10px 18px; border-radius: 999px; background: linear-gradient(135deg,#6a5cff,#b14bff); color: #fff; text-decoration: none; font-weight: 600; }
+  .cta a.ghost { background: transparent; border: 1px solid #444c63; color: #cdd3e0; }
+  section { max-width: 920px; margin: 0 auto; padding: 24px 16px; }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .shots img { width: 100%; border-radius: 12px; border: 1px solid #1c2233; }
+  h2 { font-size: 22px; border-left: 4px solid #6a5cff; padding-left: 10px; margin-top: 40px; }
+  ul { columns: 2; column-gap: 28px; }
+  li { break-inside: avoid; margin-bottom: 6px; }
+  code { background: #11151f; padding: 2px 6px; border-radius: 6px; color: #ffd479; }
+  pre { background: #11151f; padding: 14px 16px; border-radius: 10px; overflow:auto; }
+  footer { text-align:center; color:#6b7280; padding: 40px 16px; font-size: 13px; }
+  @media (max-width: 640px){ ul { columns: 1; } .shots { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Black Hole Screensaver</h1>
+  <p class="tag">把《星际穿越》里的 Gargantua 黑洞变成你的 Linux 屏保 —— 不是循环视频，而是每一帧都由 GPU 实时演算的真实物理黑洞（史瓦西度规测地线积分）。</p>
+  <div class="cta">
+    <a href="https://github.com/Wian1977/blackhole-screensaver">GitHub 仓库</a>
+    <a class="ghost" href="https://github.com/Wian1977/blackhole-screensaver/releases">下载 .deb</a>
+  </div>
+</header>
+
+<section>
+  <div class="shots">
+    <img src="https://raw.githubusercontent.com/Wian1977/blackhole-screensaver/main/screenshot-1.png" alt="吸积盘与爱因斯坦环">
+    <img src="https://raw.githubusercontent.com/Wian1977/blackhole-screensaver/main/screenshot-2.png" alt="相对论增亮与星空透镜">
+  </div>
+</section>
+
+<section>
+  <h2>为什么值得装</h2>
+  <ul>
+    <li>真实引力透镜：光线按史瓦西度规实时测地线偏折（u'' = -u + 1.5·rs·u²）</li>
+    <li>吸积盘相对论聚束（朝向侧更亮更蓝）+ 多普勒/引力红移</li>
+    <li>星空被透镜成爱因斯坦环（可开关）</li>
+    <li>DE 无关守护进程：Cinnamon / KDE / GNOME / Xfce / MATE 锁屏或空闲时自动全屏</li>
+    <li>X11 与 Wayland 都安全（Wayland 下优雅出现在锁屏之下或之前）</li>
+    <li>零空闲开销：平时只跑轻量守护，锁屏/空闲才拉起渲染</li>
+  </ul>
+</section>
+
+<section>
+  <h2>一条命令安装</h2>
+  <pre>git clone https://github.com/Wian1977/blackhole-screensaver.git
+cd blackhole-screensaver
+./install.sh</pre>
+  <p>依赖自动检测（python3-gi, gir1.2-gtk-3.0, python3-xlib, Mesa/OpenGL）。或到 Releases 下载系统级 <code>.deb</code>。</p>
+</section>
+
+<section>
+  <h2>支持的桌面</h2>
+  <ul>
+    <li>Linux Mint Cinnamon (X11) — 完整支持</li>
+    <li>Xfce / MATE — 完整支持</li>
+    <li>KDE (X11) — 守护进程自动触发</li>
+    <li>GNOME (X11 / Wayland) — 守护进程自动触发</li>
+    <li>Wayland (KDE / GNOME) — 优雅降级</li>
+  </ul>
+</section>
+
+<footer>
+  MIT License · Real-physics Schwarzschild black hole · Built with OpenGL + GTK3
+</footer>
+</body>
+</html>
