@@ -124,9 +124,10 @@ def setup_dbus():
 
 # 仅当没有屏保 DBus 服务时才用的 X11 空闲回退
 def tick():
+    # 始终运行：即使已订阅到桌面屏保信号，也用 X11 真实空闲时间做
+    # 独立触发，这样桌面的"空闲激活"开关关掉时，屏保仍能按时出现。
+    # （Wayland 下 Xlib 取不到空闲值，此时仅依赖桌面信号。）
     global proc
-    if subscribed or bus is None:
-        return True
     idle = get_idle_ms() if _get_xdisplay() else 0
     if proc is not None:
         if proc.poll() is not None:
@@ -233,8 +234,10 @@ def main():
     print('blackhole-daemon: DE=%s（DBus 通用触发 / X11 回退）' % detect_de(), flush=True)
     setup_dbus()
     if not subscribed:
-        print('未订阅到屏保 DBus 服务，启用 X11 空闲轮询回退（仅 X11）', flush=True)
-        GLib.timeout_add(POLL * 1000, tick)
+        print('未订阅到屏保 DBus 服务，X11 空闲轮询作为唯一触发（仅 X11）', flush=True)
+    else:
+        print('已订阅桌面屏保信号；同时启用 X11 空闲轮询，使空闲也能触发（不依赖桌面空闲激活开关）', flush=True)
+    GLib.timeout_add(POLL * 1000, tick)
     GLib.MainLoop().run()
 
 if __name__ == '__main__':
