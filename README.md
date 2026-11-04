@@ -2,7 +2,7 @@
 
 基于真实物理参数的施瓦西黑洞屏保：光线按史瓦西度规实时测地线偏折，含吸积盘、相对论聚束与多普勒/引力红移，并非贴图或假特效。
 
-## 真正通用 别人也能一键安装
+## 真正通用 一键安装
 
 - DE 无关（X11 和 Wayland 均安全）：触发逻辑基于 XDG 标准 org.freedesktop.ScreenSaver 加各桌面锁屏 DBus 信号（Cinnamon / KDE / GNOME / MATE / Xfce 都会发），X11 与 Wayland 都能启动，不会一上来就崩。
 - 一键安装：./install.sh 把程序装到 HOME/.local/share/blackhole-screensaver/，注册 XDG 会话自启（Cinnamon / KDE / GNOME / Xfce / MATE 全支持），并在 Xfce / MATE / Cinnamon 的屏保选择器里登记入口。
