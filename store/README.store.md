@@ -7,7 +7,7 @@ Primary distribution channel is **GitHub Releases**; KDE Store / Pling are optio
 
 - 仓库 Repo: https://github.com/Wian1977/blackhole-screensaver
 - 发布 Release: https://github.com/Wian1977/blackhole-screensaver/releases/tag/v1.1.0
-- 截图 Screenshot: 用 `python3 bh_gl.py --screenshot out.png` 生成或截运行画面；仓库不再内置固定截图，商店要求 ≥1 张时上传即可。
+- 截图 Screenshot: 仓库根目录 `screenshot-1.png` / `screenshot-2.png`（真实运行画面，上架时直接上传其一即可）。
 
 ---
 
@@ -80,7 +80,7 @@ cd blackhole-screensaver
 | Low | ~4,000 | 0.5× | 256 |
 
 ## 6) 截图（Screenshot）
-用 `python3 bh_gl.py --screenshot out.png` 生成运行画面（或锁屏时截屏）。商店通常要求 ≥1 张，上传任一即可；仓库不再内置固定截图，建议用你自己机器上的实拍。
+仓库根目录的 `screenshot-1.png` / `screenshot-2.png` 为真实运行画面，商店通常要求 ≥1 张，直接上传其一即可。
 
 ## 7) 已知限制（建议也写进描述/评论）
 - **通用**：基于 XDG / 各桌面锁屏 DBus 信号（org.freedesktop.ScreenSaver、org.kde/cinnamon/gnome/mate ScreenSaver），X11 与 Wayland 都能启动守护进程，不会一上来就崩。

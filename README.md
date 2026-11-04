@@ -18,6 +18,7 @@ Wayland 优雅降级：X11 下窗口完美覆盖锁屏；Wayland 下合成器（
 安装脚本做依赖自检（缺失会给出 apt / dnf 安装命令），无需 DISPLAY，重新登录即生效；黑洞窗口在空闲（默认 5 分钟）或锁屏时自动出现。
 卸载：./install.sh --uninstall
 依赖（Debian/Ubuntu/Mint/KDE-Neon）：python3-gi gir1.2-gtk-3.0 python3-xlib（Mesa/OpenGL 桌面已自带）。
+截图 Screenshots：仓库根目录 screenshot-1.png / screenshot-2.png（真实运行画面）。
 
 ## 使用 Usage
 
