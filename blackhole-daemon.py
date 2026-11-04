@@ -100,8 +100,15 @@ def setup_dbus():
     try:
         bus = Gio.bus_get_sync(Gio.BusType.SESSION)
     except Exception as e:
-        print('DBus 初始化失败（退回 X11 空闲轮询）:', e, flush=True)
-        return False
+        # DBUS_SESSION_BUS_ADDRESS 可能陈旧/缺失（例如在图形会话之外启动），
+        # 回退到标准的每用户总线 socket，保证仍能订阅锁屏信号。
+        try:
+            addr = 'unix:path=/run/user/%d/bus' % os.getuid()
+            bus = Gio.DBusConnection.new_for_address_sync(
+                addr, Gio.DBusConnectionFlags.NONE, None, None)
+        except Exception as e2:
+            print('DBus 初始化失败（退回 X11 空闲轮询）:', e2, flush=True)
+            return False
     for iface in ['org.freedesktop.ScreenSaver',
                   'org.kde.screensaver', 'org.kde.ScreenSaver',
                   'org.cinnamon.ScreenSaver', 'org.gnome.ScreenSaver',
