@@ -37,6 +37,7 @@ curl -fsSL -o "$TOOL" \
   https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
 chmod +x "$TOOL"
 export APPIMAGE_EXTRACT_AND_RUN=1
+export ARCH=x86_64
 "$TOOL" "$APPDIR" "$OUT"
 
 echo "built: $OUT ($(stat -c%s "$OUT") bytes)"
