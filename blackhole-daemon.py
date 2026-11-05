@@ -12,7 +12,10 @@
 import os, sys, subprocess, argparse, fcntl
 
 SELF = os.path.abspath(__file__)
-BH_GL = os.environ.get('BH_GL') or os.path.join(os.path.dirname(SELF), 'bh_gl.py')
+# 规范安装目录（与 install.sh 的 PREFIX 保持一致）。即使从其他目录直接运行
+# --install，桌面快捷方式/自启文件也始终指向此目录，避免路径错乱导致图标或启动失效。
+PREFIX = os.path.expanduser('~/.local/share/blackhole-screensaver')
+BH_GL = os.environ.get('BH_GL') or os.path.join(PREFIX, 'bh_gl.py')
 IDLE_MIN = float(os.environ.get('IDLE_MIN', '5'))   # 退回 X11 轮询时的空闲分钟数
 POLL = 2                                           # 轮询秒数
 ACTIVE_RESET_MS = 2000                             # 空闲低于此值视为“用户回来了”
@@ -146,8 +149,6 @@ def tick():
 AUTOSTART = os.path.expanduser('~/.config/autostart/blackhole-daemon.desktop')
 SCREENSAVER_DIR = os.path.expanduser('~/.local/share/applications/screensavers')
 APP_DIR = os.path.expanduser('~/.local/share/applications')
-PREFIX = os.path.dirname(SELF)
-
 def _write_autostart():
     os.makedirs(os.path.dirname(AUTOSTART), exist_ok=True)
     with open(AUTOSTART, 'w') as f:
@@ -155,7 +156,7 @@ def _write_autostart():
                 'Type=Application\n'
                 'Name=Black Hole Screensaver Daemon\n'
                 'Comment=DE-independent idle/lock screensaver launcher (X11/Wayland safe)\n'
-                'Exec=python3 %s\n' % SELF +
+                'Exec=python3 %s\n' % os.path.join(PREFIX, 'blackhole-daemon.py') +
                 'Terminal=false\n'
                 'X-GNOME-Autostart-enabled=true\n'
                 'X-KDE-autostart-enabled=true\n')
