@@ -57,7 +57,9 @@ def launch_bh():
     if proc is not None and proc.poll() is None:
         return
     try:
-        proc = subprocess.Popen(['python3', BH_GL])
+        # --daemon: bh_gl 自身不响应按键退出，生命周期完全由本守护进程掌控
+        # （锁屏时按键不应杀掉黑洞，只有真正解锁信号才退出）。
+        proc = subprocess.Popen(['python3', BH_GL, '--daemon'])
         print('launched bh_gl pid=%d' % proc.pid, flush=True)
     except Exception as e:
         print('launch fail:', e, flush=True)
@@ -132,10 +134,11 @@ def tick():
     if proc is not None:
         if proc.poll() is not None:
             proc = None
-        elif idle < ACTIVE_RESET_MS:
-            stop_bh()
+        # 敲键 / 鼠标移动都不再退出屏保。退出只由两种方式触发：
+        #   1) bh_gl 自身收到 Esc（Gtk.main_quit）
+        #   2) 真实解锁信号 ActiveChanged(false) -> stop_bh()
     else:
-        if idle >= IDLE_MIN * 60000 and not bh_running():
+        if idle >= IDLE_MIN * 60000 and not bh_running() and not lock_active:
             launch_bh()
     return True
 

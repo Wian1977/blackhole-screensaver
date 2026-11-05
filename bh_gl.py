@@ -525,8 +525,8 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
             self.toggle_help()
             return
         if keyname == "Escape":
-            if not self.daemon:
-                Gtk.main_quit()
+            # 任何模式下都只用 Esc 退出（敲其他键/动鼠标均不退出，便于使用快捷键）
+            Gtk.main_quit()
             return
         if keyname in ("m", "M"):
             self.auto_motion = not self.auto_motion
@@ -757,13 +757,14 @@ def main():
     ap.add_argument("--no-disk", action="store_true", help="start with disk brightness off")
     ap.add_argument("--no-star-lens", action="store_true", help="start with star lensing off")
     ap.add_argument("--tilt", type=float, default=None, help="override tiltDeg")
+    ap.add_argument("--windowed", action="store_true", help="run in a 1280x720 window (for screen recording / preview)")
     args = ap.parse_args()
     if args.tilt is not None:
         PARAMS["tiltDeg"] = args.tilt
 
     win = BlackHoleWindow(quality=args.quality, renderscale=args.renderscale,
                           hint=args.hint, daemon=args.daemon, plug_id=args.plug_id,
-                          windowed=(args.screenshot is not None))
+                          windowed=args.windowed or (args.screenshot is not None))
     win.star_lens = not args.no_star_lens
     win.disk_bright = not args.no_disk
     win.show_all()

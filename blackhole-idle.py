@@ -43,11 +43,7 @@ while True:
     if proc is not None:
         if proc.poll() is not None:
             proc = None
-        elif idle < ACTIVE_RESET_MS:
-            proc.terminate()
-            try: proc.wait(timeout=5)
-            except Exception: proc.kill()
-            proc = None
+        # 敲键 / 鼠标移动不再退出屏保；退出只由 bh_gl 自身 Esc 触发。
     else:
         if idle >= IDLE_MIN*60000 and not is_locked() and not bh_running():
             try:
