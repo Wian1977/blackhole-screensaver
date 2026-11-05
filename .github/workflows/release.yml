@@ -1,0 +1,85 @@
+name: Build release artifacts
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Tag/version to build (e.g. v1.1.0)'
+        required: true
+        default: 'v1.1.0'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: v
+        run: |
+          VER="${{ github.event.inputs.version }}"
+          [ -z "$VER" ] && VER="${{ github.ref_name }}"
+          echo "ver=$VER" >> "$GITHUB_OUTPUT"
+          echo "num=${VER#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build .deb
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq dpkg-dev
+          bash store/make_deb.sh "${{ steps.v.outputs.num }}"
+
+      - name: Build AppImage (best effort)
+        continue-on-error: true
+        run: |
+          sudo apt-get install -y -qq libfuse2 curl
+          bash store/make_appimage.sh "${{ steps.v.outputs.num }}"
+
+      - name: Build apt repository index
+        run: |
+          mkdir -p aptrepo
+          cp /tmp/blackhole-screensaver_*.deb aptrepo/
+          cd aptrepo
+          dpkg-scanpackages . /dev/null > Packages
+          gzip -9kf Packages
+          {
+            echo "Origin: Black Hole Screensaver"
+            echo "Label: blackhole"
+            echo "Suite: stable"
+            echo "Codename: stable"
+            echo "Date: $(date -Ru)"
+            echo "Architectures: all"
+            echo "Components: main"
+            echo "Description: Black Hole Screensaver"
+            echo "MD5Sum:"
+            printf ' %s %s Packages\n' "$(md5sum Packages | cut -d' ' -f1)" "$(stat -c%s Packages)"
+            printf ' %s %s Packages.gz\n' "$(md5sum Packages.gz | cut -d' ' -f1)" "$(stat -c%s Packages.gz)"
+            echo "SHA256:"
+            printf ' %s %s Packages\n' "$(sha256sum Packages | cut -d' ' -f1)" "$(stat -c%s Packages)"
+            printf ' %s %s Packages.gz\n' "$(sha256sum Packages.gz | cut -d' ' -f1)" "$(stat -c%s Packages.gz)"
+          } > Release
+
+      - name: Deploy apt repo to gh-pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./aptrepo
+          publish_branch: gh-pages
+
+      - name: Upload artifacts to Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER="${{ steps.v.outputs.ver }}"
+          gh release view "$VER" --repo "${{ github.repository }}" >/dev/null 2>&1 || \
+            gh release create "$VER" --repo "${{ github.repository }}" \
+              --title "$VER" --notes "Automated build" || true
+          gh release upload "$VER" /tmp/blackhole-screensaver_*.deb \
+            --clobber --repo "${{ github.repository }}"
+          if ls store/*.AppImage >/dev/null 2>&1; then
+            gh release upload "$VER" store/*.AppImage --clobber --repo "${{ github.repository }}"
+          fi

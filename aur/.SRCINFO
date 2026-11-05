@@ -1,0 +1,17 @@
+pkgbase = blackhole-screensaver
+	pkgdesc = Real-physics Schwarzschild black-hole OpenGL screensaver with a DE-independent daemon
+	pkgver = 1.1.0
+	pkgrel = 1
+	url = https://github.com/Wian1977/blackholescreensaver
+	arch = any
+	license = MIT
+	depends = python
+	depends = gtk3
+	depends = python-gobject
+	depends = python-xlib
+	depends = mesa
+	depends = libgl
+	source = git+https://github.com/Wian1977/blackholescreensaver.git#tag=v1.1.0
+	sha256sums = SKIP
+
+pkgname = blackhole-screensaver

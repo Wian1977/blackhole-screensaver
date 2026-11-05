@@ -1,0 +1,35 @@
+# Maintainer: Wian1977 <blackhole@example.com>
+pkgname=blackhole-screensaver
+pkgver=1.1.0
+pkgrel=1
+pkgdesc="Real-physics Schwarzschild black-hole OpenGL screensaver with a DE-independent daemon"
+arch=('any')
+url="https://github.com/Wian1977/blackholescreensaver"
+license=('MIT')
+depends=('python' 'gtk3' 'python-gobject' 'python-xlib' 'mesa' 'libgl')
+source=("git+${url}.git#tag=v${pkgver}")
+sha256sums=('SKIP')
+
+package() {
+  cd "$srcdir/$pkgname"
+  APP="$pkgdir/usr/share/blackhole-screensaver"
+  install -d "$APP" "$pkgdir/usr/share/applications/screensavers" "$pkgdir/etc/xdg/autostart"
+  cp *.py "$APP/"
+  cp *.bin "$APP/" 2>/dev/null || true
+  install -Dm644 plugin/blackhole.png "$APP/blackhole.png" 2>/dev/null || install -Dm644 blackhole.png "$APP/blackhole.png" 2>/dev/null || true
+  chmod 755 "$APP/bh_gl.py" "$APP/blackhole-daemon.py"
+  PREFIX_BHGL="$APP/bh_gl.py"
+  ICON="$APP/blackhole.png"
+  sed -e "s|@BH_GL@|$PREFIX_BHGL|" blackhole.desktop.in > "$pkgdir/usr/share/applications/screensavers/blackhole.desktop"
+  sed -e "s|@BH_GL@|$PREFIX_BHGL|" -e "s|@ICON@|$ICON|" blackhole-app.desktop.in > "$pkgdir/usr/share/applications/blackhole-screensaver.desktop"
+  cat > "$pkgdir/etc/xdg/autostart/blackhole-daemon.desktop" <<DE
+[Desktop Entry]
+Type=Application
+Name=Black Hole Screensaver Daemon
+Comment=DE-independent idle/lock screensaver launcher
+Exec=python3 $APP/blackhole-daemon.py
+Terminal=false
+X-GNOME-Autostart-enabled=true
+DE
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

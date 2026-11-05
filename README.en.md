@@ -22,8 +22,8 @@ Turn the Interstellar "Gargantua" black hole into your Linux screensaver — not
 
 ## Install (one command)
 
-    git clone https://github.com/Wian1977/blackhole-screensaver.git
-    cd blackhole-screensaver
+    git clone https://github.com/Wian1977/blackholescreensaver.git
+    cd blackholescreensaver
     ./install.sh
 
 Then lock your screen or wait about 5 minutes and the black hole appears. To preview immediately: python3 bh_gl.py (press Esc to quit).

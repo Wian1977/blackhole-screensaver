@@ -30,8 +30,8 @@ This is a native OpenGL Linux screensaver that renders a real Schwarzschild blac
 
 ## 安装（一条命令）/ Install
 
-    git clone https://github.com/Wian1977/blackhole-screensaver.git
-    cd blackhole-screensaver
+    git clone https://github.com/Wian1977/blackholescreensaver.git
+    cd blackholescreensaver
     ./install.sh
 
 然后锁屏，或空闲约 5 分钟，黑洞就会出现。想立刻预览：python3 bh_gl.py（按 Esc 退出）。

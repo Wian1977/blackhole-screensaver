@@ -25,7 +25,7 @@ Source and releases: https://github.com/Wian1977/blackhole-screensaver
 ## Submission checklist
 
 - [x] Please describe the application briefly.
-- [x] Please attach a video showcasing the application on Linux using the Flatpak.
+- [x] Please attach a video showcasing the application on Linux using the Flatpak. https://github.com/Wian1977/blackhole-screensaver/releases/download/v1.1.0/blackhole_cast.mp4
 - [x] The Flatpak ID follows all the rules listed in the ID guidelines.
 - [x] I have read and followed all the submission guidelines.
 - [x] The application has a meaningful development history, evidence of real-world use, and a clear commitment to ongoing maintenance, as required by the requirements.
@@ -33,10 +33,11 @@ Source and releases: https://github.com/Wian1977/blackhole-screensaver
 - [ ] I have not used AI tools or agents to generate or automate this submission pull request or its review interactions.
 - [x] Your role in the project (author, developer, or upstream contributor)
 
+- [x] I am the author of this project.
+
 AI disclosure: I used an AI coding assistant to help draft the Flatpak manifest,
 the AppStream metainfo, and this submission description. The application source
-code itself is my own original work. I am the upstream author and I am
-submitting this myself.
+code itself is my own original work.
 
 ## Permission notes (finish-args)
 
@@ -45,4 +46,6 @@ bus names. It never owns a name or talks to anything else, so the surface is
 small. wayland, fallback-x11 and dri are just what the GL window needs. The
 XDG autostart .desktop starts the daemon with the user session, which is the
 whole point of a screensaver.
-Video (live Flatpak capture): https://github.com/Wian1977/blackhole-screensaver/releases/download/v1.1.0/blackhole_cast.mp4
+
+Video (live capture of the application running, hosted on GitHub Releases):
+https://github.com/Wian1977/blackhole-screensaver/releases/download/v1.1.0/blackhole_cast.mp4

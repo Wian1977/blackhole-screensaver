@@ -5,8 +5,8 @@
 
 Primary distribution channel is **GitHub Releases**; KDE Store / Pling are optional.
 
-- 仓库 Repo: https://github.com/Wian1977/blackhole-screensaver
-- 发布 Release: https://github.com/Wian1977/blackhole-screensaver/releases/tag/v1.1.0
+- 仓库 Repo: https://github.com/Wian1977/blackholescreensaver
+- 发布 Release: https://github.com/Wian1977/blackholescreensaver/releases/tag/v1.1.0
 - 截图 Screenshot: 仓库根目录 `screenshot-1.png` / `screenshot-2.png`（真实运行画面，上架时直接上传其一即可）。
 
 ---
@@ -53,7 +53,7 @@ python3, python3-gi (GTK3), python3-xlib, gir1.2-gtk-3.0, Mesa/OpenGL
 ## 3) 终端用户安装说明（Install / Comments）
 ```
 tar xzf blackhole-screensaver-*.tar.gz
-cd blackhole-screensaver
+cd blackholescreensaver
 ./install.sh
 # 锁屏或空闲即出现黑洞；Esc 或任意输入退出
 # 卸载: ./install.sh --uninstall
