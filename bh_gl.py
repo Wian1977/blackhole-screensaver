@@ -299,6 +299,7 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
         self.add(self.overlay)
         self.overlay.add(self.glarea)
         self._build_help_overlay()
+        self._build_radial_panel()
 
         self.glarea.connect("realize", self.on_realize)
         self.glarea.connect("render", self.on_render)
@@ -501,6 +502,15 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
     def tick(self):
         if self.prog is not None and self.prog >= 0:
             self.glarea.queue_render()
+        try:
+            if self.radial_box is not None:
+                t = (GLib.get_monotonic_time() - self.start_t) / 1e6
+                self.radial_t = t
+                if t - self.radial_last >= 0.2:
+                    self.radial_last = t
+                    self._update_radial_panel()
+        except Exception:
+            pass
         return True
 
     def on_key(self, widget, event):
@@ -552,6 +562,11 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
         elif keyname in ("b", "B"):
             self.disk_bright = not self.disk_bright
             self._flash("盘面亮度: " + ("开" if self.disk_bright else "关"))
+        elif keyname in ("r", "R"):
+            self.radial_visible = not getattr(self, "radial_visible", False)
+            if self.radial_box is not None:
+                self.radial_box.set_visible(self.radial_visible)
+            self._flash("径向结构面板: " + ("开" if self.radial_visible else "关"))
 
     def on_button(self, widget, event):
         # 仅 ESC 退出屏保（见 on_key），点击不退出，避免与快捷键冲突
@@ -638,6 +653,167 @@ class BlackHoleWindow(Gtk.Plug if _PLUG_MODE else Gtk.Window):
         except Exception:
             pass
         self.overlay.add_overlay(self.help_label)
+
+    # ---------- 径向结构面板（同步网页 v2.157；左下角，白注释 + 橙红数值）----------
+    def _build_radial_panel(self):
+        try:
+            self.radial_visible = True
+            self.radial_t = 0.0
+            self.radial_last = 0.0
+            self.radial_box = None
+            box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+            box.set_halign(Gtk.Align.START)
+            box.set_valign(Gtk.Align.END)
+            box.set_margin_start(16)
+            box.set_margin_bottom(16)
+            box.set_spacing(4)
+            box.set_sensitive(False)
+            try:
+                prov = Gtk.CssProvider()
+                prov.load_from_data(
+                    b"box.bh-radial{background-color:rgba(9,14,26,0.78);"
+                    b"border:1px solid rgba(120,155,220,0.22);border-radius:10px;"
+                    b"padding:8px 10px;} "
+                    b"box.bh-radial label{font-size:11px;color:#e8eef5;}")
+                ctx = box.get_style_context()
+                ctx.add_provider(prov, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION)
+                ctx.add_class("bh-radial")
+            except Exception:
+                pass
+            da = Gtk.DrawingArea()
+            da.set_size_request(248, 168)
+            da.connect("draw", self._draw_radial)
+            box.pack_start(da, False, False, 0)
+            self.radial_da = da
+            lbl = Gtk.Label()
+            lbl.set_halign(Gtk.Align.START)
+            lbl.set_line_wrap(False)
+            lbl.set_use_markup(True)
+            box.pack_start(lbl, False, False, 0)
+            self.radial_label = lbl
+            self.overlay.add_overlay(box)
+            box.set_visible(self.radial_visible)
+            self.radial_box = box
+            self._update_radial_panel()
+        except Exception as e:
+            sys.stderr.write("radial panel build failed: " + str(e) + chr(10))
+            self.radial_box = None
+
+    def _radial_vals(self):
+        rs = float(PARAMS["ringIn"]) / 2.598076
+        inner = float(PARAMS["inner"])
+        omega = 3.5 * float(PARAMS["rotSpeed"]) / 5.196
+        phase = (float(PARAMS["roll"]) + float(PARAMS["yaw"])) * math.pi / 180.0
+        inner_now = 1.12 + (1.51 - 1.12) * (0.5 + 0.5 * math.sin(phase))
+        lens = getattr(self, "star_lens", False)
+        bright = float(PARAMS["brightness"])
+        drift = any(getattr(self, "drift_active", {}).values())
+        return dict(rs=rs, inner=inner, omega=omega, inner_now=inner_now,
+                    lens=lens, bright=bright, drift=drift,
+                    tilt=int(round(float(PARAMS["tiltDeg"]))),
+                    dist=float(PARAMS["distance"]),
+                    rotSpeed=float(PARAMS["rotSpeed"]))
+
+    def _draw_radial(self, widget, cr):
+        try:
+            w = float(widget.get_allocated_width())
+            h = float(widget.get_allocated_height())
+            v = self._radial_vals()
+            rs = v["rs"]; inner = v["inner"]; lens = v["lens"]; t = self.radial_t
+            cx, cy, R = 80.0, 58.0, 46.0
+            cr.set_source_rgba(0.16, 0.20, 0.29, 1.0)
+            cr.set_line_width(1.0)
+            cr.arc(cx, cy, R + 5.0, 0.0, 2.0 * math.pi); cr.stroke()
+            cr.set_source_rgb(0.02, 0.027, 0.05)
+            cr.arc(cx, cy, 34.0, 0.0, 2.0 * math.pi); cr.fill()
+            cr.set_source_rgb(0.27, 0.31, 0.42)
+            cr.arc(cx, cy, 34.0, 0.0, 2.0 * math.pi); cr.stroke()
+            cr.set_source_rgb(1.0, 0.6, 0.25)
+            cr.set_line_width(3.0)
+            cr.arc(cx, cy, 42.0, -0.95, 0.55); cr.stroke()
+            if lens:
+                cr.set_source_rgba(0.43, 0.69, 1.0, 1.0)
+                cr.set_line_width(2.5)
+                cr.arc(cx, cy, 28.0, 0.0, 2.0 * math.pi); cr.stroke()
+            rx = 42.0 - (inner - 1.0) / (3.14 - 1.0) * 9.0
+            cr.save()
+            cr.translate(cx, cy); cr.rotate(-0.12)
+            cr.set_source_rgb(0.88, 0.63, 0.39)
+            cr.set_line_width(6.0)
+            cr.scale(1.0, 0.32)
+            cr.arc(0.0, 0.0, rx, 0.0, 2.0 * math.pi); cr.stroke()
+            cr.restore()
+            cr.set_source_rgb(0.62, 0.71, 0.85)
+            for (sx, sy) in [(18.0, 22.0), (146.0, 16.0), (138.0, 96.0), (24.0, 94.0)]:
+                cr.arc(sx, sy, 1.3, 0.0, 2.0 * math.pi); cr.fill()
+            ang = (t * 0.6) % (2.0 * math.pi)
+            cr.set_source_rgb(1.0, 0.88, 0.69)
+            cr.arc(cx + 38.0 * math.cos(ang), cy + 38.0 * math.sin(ang), 2.4, 0.0, 2.0 * math.pi); cr.fill()
+            ax0, ax1, ay = 12.0, w - 12.0, h - 24.0
+            aw = ax1 - ax0
+            cr.set_source_rgb(0.02, 0.03, 0.06); cr.rectangle(ax0, ay, aw, 13.0); cr.fill()
+            inner_screen = 1.12 + (inner - 1.0) / (3.14 - 1.0) * (1.51 - 1.12)
+            inner_frac = (inner_screen - 1.0) / (3.05 - 1.0)
+            cr.set_source_rgba(0.55, 0.35, 0.20, 0.9)
+            cr.rectangle(ax0 + inner_frac * aw, ay, (1.0 - inner_frac) * aw, 13.0); cr.fill()
+            a0 = (1.0 - 1.0) / (3.05 - 1.0); a1 = (1.059 - 1.0) / (3.05 - 1.0)
+            cr.set_source_rgba(1.0, 0.6, 0.25, 0.9)
+            cr.rectangle(ax0 + a0 * aw, ay, (a1 - a0) * aw, 4.0); cr.fill()
+            cr.set_source_rgba(0.43, 0.69, 1.0, 0.5 if lens else 0.08)
+            cr.rectangle(ax0, ay, aw, 13.0); cr.fill()
+            for tf in (1.0, 1.059, inner_screen, 3.05):
+                x = ax0 + (tf - 1.0) / (3.05 - 1.0) * aw
+                cr.set_source_rgba(0.85, 0.83, 0.65, 0.5)
+                cr.set_line_width(1.0)
+                cr.move_to(x, ay - 2.0); cr.line_to(x, ay + 15.0); cr.stroke()
+            curs = (t * 0.12) % 1.0
+            cr.set_source_rgba(1.0, 0.85, 0.6, 0.9)
+            cr.set_line_width(1.0)
+            cr.move_to(ax0 + curs * aw, ay - 2.0); cr.line_to(ax0 + curs * aw, ay + 15.0); cr.stroke()
+        except Exception as e:
+            sys.stderr.write("radial draw error: " + str(e) + chr(10))
+
+    def _update_radial_panel(self):
+        try:
+            if self.radial_box is None:
+                return
+            v = self._radial_vals()
+            rs = v["rs"]
+            V = "#ff7043"
+            O = "#e8eef5"
+            S = lambda s: "<span foreground='%s'>%s</span>" % (V, s)
+            lens = v["lens"]
+            lens_txt = S("已启用（三族）") if lens else "<span foreground='%s'>仅启用透镜时出现</span>" % O
+            disk_pct = int(round(v["bright"] / 2.0 * 100.0))
+            drift_txt = "相机 漂移中" if v["drift"] else "相机 静止"
+            title = "<span foreground='#ffffff'><b>黑洞径向结构</b></span>"
+            radii = (
+                "事件视界 r_s " + S("1.000") + " · " + S("%.4f" % rs) + chr(10) +
+                "光子球 r_ph " + S("1.500") + " · " + S("%.4f" % (1.5 * rs)) + chr(10) +
+                "吸积盘内缘 r_in " + S("1.950") + " · " + S("%.3f" % (1.95 * rs)) + chr(10) +
+                "光子捕获 b_crit " + S("2.598") + " · " + S("%.2f" % float(PARAMS["ringIn"])) + chr(10) +
+                "<span foreground='%s'>↑ 几何半径（单位 r_s）；下方为屏幕投影 tSh</span>" % O)
+            rows = (
+                "① 黑洞阴影 tSh&lt;1 · 光子俘获区" + chr(10) +
+                "② 相对论增亮弧 1.000→1.059 · 迎光侧多普勒增亮" + chr(10) +
+                "③ 透镜星像 / 爱因斯坦环 · " + lens_txt + chr(10) +
+                "④ 吸积盘 · 内缘 " + S("%.2f" % v["inner_now"]) + " r_s 随方位" + chr(10) +
+                "<span foreground='%s'>tSh 刻度: 1.000 1.15 1.50 2.00 2.50 3.05</span>" % V)
+            speed = (
+                "盘轨道角速度 Ω " + S("%.3f" % v["omega"]) + " rad/s (ISCO)" + chr(10) +
+                "盘转速 " + S("%.2f" % v["rotSpeed"]) + "× · 星空转速 " + S("1.00") + "× · " + drift_txt)
+            foot = ("ψ_sh " + S("5.7195°") + " · uRs " + S("%.4f" % rs) +
+                    " · rPh " + S("%.4f" % (1.5 * rs)))
+            status = ("透镜 " + ("开" if lens else "关") + " · 盘亮度 " +
+                      S("%d%%" % disk_pct) + " · 倾角 " + S("%d°" % v["tilt"]) +
+                      " · 观测距离 r₀ " + S("%.1f" % v["dist"]))
+            markup = (title + chr(10) + radii + chr(10) + rows + chr(10) +
+                      speed + chr(10) + foot + chr(10) + status)
+            self.radial_label.set_markup(markup)
+            if self.radial_box.get_visible():
+                self.radial_da.queue_draw()
+        except Exception as e:
+            sys.stderr.write("radial update error: " + str(e) + chr(10))
 
     def set_quality(self, name):
         if name not in QUALITY_BY_NAME:
