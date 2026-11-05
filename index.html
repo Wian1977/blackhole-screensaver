@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Black Hole Screensaver — 安装 / Install</title>
+<style>
+body { max-width: 760px; margin: 3rem auto; padding: 0 1.2rem;
+       font: 16px/1.6 system-ui, sans-serif; color: #e8e8ea; background: #0d0d12; }
+h1 { color: #ffb45c; } h2 { margin-top: 2rem; color: #9db4ff; }
+a { color: #7fc8ff; }
+pre { background: #1a1a24; padding: 1rem; border-radius: 8px; overflow-x: auto; }
+code { font-family: ui-monospace, monospace; }
+.note { color: #a0a0aa; font-size: .9rem; }
+</style>
+</head>
+<body>
+<h1>Black Hole Screensaver</h1>
+<p>Real-physics Schwarzschild black-hole OpenGL screensaver for Linux.<br>
+项目主页：<a href="https://github.com/Wian1977/blackholescreensaver">github.com/Wian1977/blackholescreensaver</a></p>
+
+<h2>apt (Debian / Ubuntu / Linux Mint)</h2>
+<pre><code>echo "deb [trusted=yes] https://wian1977.github.io/blackholescreensaver/ ./" | sudo tee /etc/apt/sources.list.d/blackhole.list
+sudo apt update &amp;&amp; sudo apt install blackhole-screensaver</code></pre>
+
+<h2>dnf / yum (Fedora / RHEL)</h2>
+<pre><code>sudo tee /etc/yum.repos.d/blackhole.repo &lt;&lt;'EOF'
+[blackhole]
+name=Black Hole Screensaver
+baseurl=https://wian1977.github.io/blackholescreensaver/rpm/
+enabled=1
+gpgcheck=0
+EOF
+sudo dnf install blackhole-screensaver</code></pre>
+
+<h2>直接下载 / Direct downloads</h2>
+<ul>
+<li><a href="https://github.com/Wian1977/blackholescreensaver/releases/tag/v1.1.0">GitHub Releases v1.1.0</a> — .deb / .rpm / AppImage</li>
+<li><code>BlackHoleScreensaver-1.1.0-x86_64.AppImage</code> — chmod +x 后直接运行（--windowed 开窗口预览）</li>
+</ul>
+
+<h2>其他渠道 / Other channels</h2>
+<ul>
+<li>Nix (NUR): <code>repos.Wian1977.blackhole-screensaver</code></li>
+<li>Homebrew: <code>brew tap Wian1977/blackhole &amp;&amp; brew install blackhole-screensaver</code></li>
+<li>Arch (AUR): <code>blackhole-screensaver</code></li>
+</ul>
+
+<p class="note">apt / RPM 仓库未做 GPG 签名，故使用 trusted / gpgcheck=0。构建由 GitHub Actions 自动生成。</p>
+</body>
+</html>
