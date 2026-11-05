@@ -24,7 +24,7 @@ This is a native OpenGL Linux screensaver that renders a real Schwarzschild blac
 - 真实引力透镜：史瓦西测地线积分（u'' = -u + 1.5·rs·u²）
 - 吸积盘相对论聚束（I 正比于 g 的三次方）+ 多普勒 / 引力红移（蓝近红远）
 - 星空透镜爱因斯坦环（可开关）+ 3 档画质
-- DE 无关守护进程：空闲 / 锁屏时在 Cinnamon、KDE、GNOME、Xfce、MATE 全平台自动全屏启动，任意输入即退出
+- DE 无关守护进程：空闲 / 锁屏时在 Cinnamon、KDE、GNOME、Xfce、MATE 全平台自动全屏启动，只有 Esc 退出（其他按键是实时快捷键，鼠标移动不会退出）
 - X11 与 Wayland 都安全（Wayland 下窗口优雅出现在锁屏之下或之前，不崩溃）
 - 实时调控：距离、盘面亮度、星空透镜、自动运镜、暂停、画质
 
@@ -37,6 +37,27 @@ This is a native OpenGL Linux screensaver that renders a real Schwarzschild blac
 然后锁屏，或空闲约 5 分钟，黑洞就会出现。想立刻预览：python3 bh_gl.py（按 Esc 退出）。
 
 Dependencies are auto-detected by the installer: python3-gi, gir1.2-gtk-3.0, python3-xlib, Mesa/OpenGL. Prefer a system-wide install? Grab the .deb from the Releases page and run sudo dpkg -i blackhole-screensaver_*.deb.
+
+
+### 其他安装方式 / Other install options
+
+**Debian / Ubuntu / Linux Mint（.deb）** —— 从 [Releases](https://github.com/Wian1977/blackholescreensaver/releases/tag/v1.1.0) 下载 `blackhole-screensaver_<ver>_all.deb`：
+
+    sudo apt install ./blackhole-screensaver_*.deb
+
+**apt 仓库（可自动更新）**：
+
+    echo "deb [trusted=yes] https://wian1977.github.io/blackholescreensaver/ ./" | sudo tee /etc/apt/sources.list.d/blackhole.list
+    sudo apt update && sudo apt install blackhole-screensaver
+
+**AppImage（单文件，跨发行版）** —— 下载 `BlackHoleScreensaver-<ver>-x86_64.AppImage`，加执行权限后直接运行：
+
+    chmod +x BlackHoleScreensaver-*.AppImage
+    ./BlackHoleScreensaver-*.AppImage --windowed
+
+不带参数即全屏；`--windowed` 开 1280×720 窗口方便预览/录屏。宿主需具备 python3 + PyGObject + GTK3 + Mesa（与 `install.sh` 检查的依赖相同）。
+
+**Arch Linux (AUR)** —— `aur/PKGBUILD` 与 `.SRCINFO` 已备好，包名 `blackhole-screensaver`（待提交 AUR）。
 
 ## 支持的桌面 / Desktop support
 
