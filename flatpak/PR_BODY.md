@@ -45,3 +45,4 @@ bus names. It never owns a name or talks to anything else, so the surface is
 small. wayland, fallback-x11 and dri are just what the GL window needs. The
 XDG autostart .desktop starts the daemon with the user session, which is the
 whole point of a screensaver.
+Video (live Flatpak capture): https://github.com/Wian1977/blackhole-screensaver/releases/download/v1.1.0/blackhole_cast.mp4
