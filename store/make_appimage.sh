@@ -34,7 +34,7 @@ DE
 
 TOOL="$WORK/appimagetool"
 curl -fsSL -o "$TOOL" \
-  https://github.com/AppImage/AppImageKit/releases/download/13/appimagetool-x86_64.AppImage
+  https://github.com/AppImage/appimagetool/releases/download/1.9.1/appimagetool-x86_64.AppImage
 chmod +x "$TOOL"
 export APPIMAGE_EXTRACT_AND_RUN=1
 "$TOOL" "$APPDIR" "$OUT"
