@@ -1,0 +1,14 @@
+Origin: Black Hole Screensaver
+Label: blackhole
+Suite: stable
+Codename: stable
+Date: Thu, 05 Nov 2026 07:37:57 +0000
+Architectures: all
+Components: main
+Description: Black Hole Screensaver
+MD5Sum:
+ 02853e6224e9b7baa9b26b94ddd5b0aa 869 Packages
+ 3bbfcc9129f62d81acfc151cba8e0d80 583 Packages.gz
+SHA256:
+ efd61abf637e1f7d505e023bf154e0cbad0262ede5f41860041373bcd860aee3 869 Packages
+ da4c54e1686302393559197da4cfe5d494d0028dc591dc17371533b2c3d38ab2 583 Packages.gz

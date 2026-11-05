@@ -1,0 +1,20 @@
+Package: blackhole-screensaver
+Version: 1.1.0
+Architecture: all
+Maintainer: Wian1977 <blackhole@example.com>
+Depends: python3 (>=3.6), python3-gi, gir1.2-gtk-3.0, python3-xlib, libgl1
+Recommends: mesa-utils
+Filename: ./blackhole-screensaver_1.1.0_all.deb
+Size: 615432
+MD5sum: 23716ab09d8f44f5c922034e327357ed
+SHA1: 1ee4f74a0194056946b8948666aa3037778c88d4
+SHA256: 85b74e7b866d1067337ce22a63ca8f63a6942cac590055879a0411d10aab6270
+Section: graphics
+Priority: optional
+Description: Real-physics Schwarzschild black-hole OpenGL screensaver
+ A native OpenGL visualization of a Schwarzschild black hole simulated with
+ real physical parameters: gravitational lensing via geodesic integration,
+ an accretion disk with relativistic beaming, and Doppler/gravitational
+ redshift. Ships a DE-independent daemon that launches full-screen on X11
+ idle/lock and exits on any input.
+
