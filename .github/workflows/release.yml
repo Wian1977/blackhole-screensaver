@@ -62,6 +62,7 @@ jobs:
             printf ' %s %s Packages\n' "$(sha256sum Packages | cut -d' ' -f1)" "$(stat -c%s Packages)"
             printf ' %s %s Packages.gz\n' "$(sha256sum Packages.gz | cut -d' ' -f1)" "$(stat -c%s Packages.gz)"
           } > Release
+          cp docs/pages/index.html aptrepo/index.html
 
       - name: Build RPM repository
         run: |
