@@ -63,6 +63,18 @@ jobs:
             printf ' %s %s Packages.gz\n' "$(sha256sum Packages.gz | cut -d' ' -f1)" "$(stat -c%s Packages.gz)"
           } > Release
 
+      - name: Build RPM repository
+        run: |
+          sudo apt-get install -y -qq rpm createrepo-c
+          mkdir -p rpmtop/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          curl -fsSL -o rpmtop/SOURCES/v${{ steps.v.outputs.num }}.tar.gz \
+            "${{ github.server_url }}/${{ github.repository }}/archive/refs/tags/${{ steps.v.outputs.ver }}.tar.gz"
+          cp store/blackhole-screensaver.spec rpmtop/SPECS/
+          rpmbuild --define "_topdir $PWD/rpmtop" -bb rpmtop/SPECS/blackhole-screensaver.spec
+          mkdir -p aptrepo/rpm
+          cp rpmtop/RPMS/noarch/*.rpm aptrepo/rpm/
+          (cd aptrepo/rpm && createrepo_c .)
+
       - name: Deploy apt repo to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -82,4 +94,7 @@ jobs:
             --clobber --repo "${{ github.repository }}"
           if ls store/*.AppImage >/dev/null 2>&1; then
             gh release upload "$VER" store/*.AppImage --clobber --repo "${{ github.repository }}"
+          fi
+          if ls rpmtop/RPMS/noarch/*.rpm >/dev/null 2>&1; then
+            gh release upload "$VER" rpmtop/RPMS/noarch/*.rpm --clobber --repo "${{ github.repository }}"
           fi
