@@ -5,10 +5,10 @@ Maintainer: Wian1977 <blackhole@example.com>
 Depends: python3 (>=3.6), python3-gi, gir1.2-gtk-3.0, python3-xlib, libgl1
 Recommends: mesa-utils
 Filename: ./blackhole-screensaver_1.1.0_all.deb
-Size: 615432
-MD5sum: 23716ab09d8f44f5c922034e327357ed
-SHA1: 1ee4f74a0194056946b8948666aa3037778c88d4
-SHA256: 85b74e7b866d1067337ce22a63ca8f63a6942cac590055879a0411d10aab6270
+Size: 615430
+MD5sum: bb906ee333a1792d8e2b5046d9d10a59
+SHA1: 439df3171d8ec6f0f21ae37c2d2d4ef1c90a3f78
+SHA256: b82492bf3df0cf0ce4c68982cfec80de465368a6f056e733ea83163714fe202e
 Section: graphics
 Priority: optional
 Description: Real-physics Schwarzschild black-hole OpenGL screensaver
