@@ -187,6 +187,13 @@ def install():
             with open(os.path.join(desk, 'blackhole-screensaver.desktop'), 'w') as f:
                 f.write(txt)
             os.chmod(os.path.join(desk, 'blackhole-screensaver.desktop'), 0o755)
+            # Cinnamon/Nemo 桌面需 metadata::trusted 才会渲染图标，否则仅显示通用图标
+            try:
+                subprocess.run(['gio', 'set',
+                                os.path.join(desk, 'blackhole-screensaver.desktop'),
+                                'metadata::trusted', 'true'], check=False)
+            except Exception:
+                pass
     print('install done. 黑洞窗口会在空闲/锁屏时自动出现。', flush=True)
 
 def uninstall():
